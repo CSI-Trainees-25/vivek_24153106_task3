@@ -56,6 +56,10 @@ public class AlienInvasion extends JPanel implements ActionListener, KeyListener
     int alienCount = 0;
     int alienVelocityX = 1;
 
+    ArrayList<Block> bulletsArray;
+    int bulletWidth = tileSize/8;
+    int bulletHeight = tileSize/2;
+    int bulletVelocityY = -10;
 
     Timer gameLoop;
 
@@ -82,6 +86,7 @@ public class AlienInvasion extends JPanel implements ActionListener, KeyListener
         ship = new Block(shipX, shipY, shipWidth, shipHeight, shipImage);
 
         alienArray = new ArrayList<Block>();
+        bulletsArray = new ArrayList<Block>();
 
         gameLoop = new Timer(1000/60, this);
         createAliens();
@@ -102,6 +107,15 @@ public class AlienInvasion extends JPanel implements ActionListener, KeyListener
                 g.drawImage(alien.img, alien.x, alien.y, alien.width, alien.height, null);
             }
         }
+
+         g.setColor(Color.white);
+        for(int i = 0; i < bulletsArray.size(); i++) {
+            Block bullet = bulletsArray.get(i);
+            if(!bullet.used) {
+                //g.drawRect(bullet.x, bullet.y, bullet.width, bullet.height);
+                g.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+            }
+        }
     }
 
      public void move() {
@@ -110,7 +124,42 @@ public class AlienInvasion extends JPanel implements ActionListener, KeyListener
              Block alien = alienArray.get(i);
              if(alien.alive) {
                  alien.x += alienVelocityX;
+
+                 if(alien.x + alien.width >= boardWidth || alien.x <= 0) {
+                      alienVelocityX *= -1;
+                      alien.x += alienVelocityX*2;
+
+                      for(int j = 0; j < alienArray.size(); j++) {
+                          alienArray.get(j).y += alienHeight;
+                      }
+                 }
              }
+         }
+
+         for(int i = 0; i < bulletsArray.size(); i++) {
+             Block bullet = bulletsArray.get(i);
+             bullet.y += bulletVelocityY;
+
+             for(int j = 0; j < alienArray.size(); j++) {
+                 Block alien = alienArray.get(j);
+                 if(!bullet.used && alien.alive && collisionDetector(bullet, alien)) {
+                     bullet.used = true;
+                     alien.alive = false;
+                     alienCount--;
+                 }
+             }
+         }
+
+         while (bulletsArray.size() > 0 && (bulletsArray.get(0).used || bulletsArray.get(0).y < 0)) {
+             bulletsArray.remove(0);
+         }
+
+         if(alienCount == 0) {
+             alienColumns = Math.min(alienColumns + 1, columns/2-2);
+             alienRows = Math.min(alienRows + 1, rows -6);
+             alienArray.clear();
+             bulletsArray.clear();
+             createAliens();
          }
      }
 
@@ -131,6 +180,13 @@ public class AlienInvasion extends JPanel implements ActionListener, KeyListener
         alienCount = alienArray.size();
     }
 
+    public boolean collisionDetector(Block a, Block b) {
+         return a.x <b.x + b.width &&
+                 a.x + a.width > b.x &&
+                 a.y < b.y + b.height &&
+                 a.y + a.height > b.y;
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         move();
@@ -149,6 +205,9 @@ public class AlienInvasion extends JPanel implements ActionListener, KeyListener
             ship.x -= shipVelocityX;
         } else if (e.getKeyCode() == KeyEvent.VK_RIGHT && ship.x + ship.width + shipVelocityX <= boardWidth) {
             ship.x += shipVelocityX;
+        } else if(e.getKeyCode() == KeyEvent.VK_SPACE) {
+            Block bullet = new Block(ship.x + shipWidth*15/32, ship.y, bulletWidth, bulletHeight, null);
+            bulletsArray.add(bullet);
         }
     }
 }

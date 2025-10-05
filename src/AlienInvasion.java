@@ -54,6 +54,8 @@ public class AlienInvasion extends JPanel implements ActionListener, KeyListener
     int alienRows = 2;
     int alienColumns = 3;
     int alienCount = 0;
+    int alienVelocityX = 1;
+
 
     Timer gameLoop;
 
@@ -102,6 +104,16 @@ public class AlienInvasion extends JPanel implements ActionListener, KeyListener
         }
     }
 
+     public void move() {
+        //aliens
+         for(int i = 0; i < alienArray.size(); i++) {
+             Block alien = alienArray.get(i);
+             if(alien.alive) {
+                 alien.x += alienVelocityX;
+             }
+         }
+     }
+
     public void createAliens() {
         Random random = new Random();
         for (int r = 0; r < alienRows; r++) {
@@ -121,6 +133,7 @@ public class AlienInvasion extends JPanel implements ActionListener, KeyListener
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        move();
         repaint();
     }
 

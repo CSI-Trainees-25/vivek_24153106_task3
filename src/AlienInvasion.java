@@ -5,8 +5,7 @@ import java.util.Random;
 import javax.swing.*;
 
 
-public class AlienInvasion extends JPanel {
-
+public class AlienInvasion extends JPanel implements ActionListener, KeyListener {
     class Block {
         int x;
         int y;
@@ -42,15 +41,27 @@ public class AlienInvasion extends JPanel {
     int shipWidth = tileSize*2;
     int shipHeight = tileSize;
     int shipX = tileSize*columns/2 - tileSize;
-    int shipY =  boardHeight - tileSize;
-
+    int shipY =  boardHeight - 2*tileSize;
+    int shipVelocityX = tileSize;
     Block ship;
+
+    ArrayList<Block> alienArray;
+    int alienWidth = tileSize*2;
+    int alienHeight = tileSize;
+    int alienX = tileSize;
+    int alienY = tileSize;
+
+    int alienRows = 2;
+    int alienColumns = 3;
+    int alienCount = 0;
 
     Timer gameLoop;
 
     public AlienInvasion(){
         setPreferredSize(new Dimension(boardWidth, boardHeight));
-        setBackground(new Color(135, 255, 227));
+        setBackground(Color.black);
+        setFocusable(true );
+        addKeyListener(this);
 
         shipImage = new ImageIcon(getClass().getResource("/assets/ship.png")).getImage();
         alien = new ImageIcon(getClass().getResource("./assets/alien.png")).getImage();
@@ -68,7 +79,11 @@ public class AlienInvasion extends JPanel {
 
         ship = new Block(shipX, shipY, shipWidth, shipHeight, shipImage);
 
+        alienArray = new ArrayList<Block>();
+
         gameLoop = new Timer(1000/60, this);
+        createAliens();
+        gameLoop.start();
     }
 
     public void paintComponent(Graphics g) {
@@ -78,5 +93,49 @@ public class AlienInvasion extends JPanel {
 
     public void draw(Graphics g) {
         g.drawImage(ship.img, ship.x, ship.y, ship.width, ship.height, null);
+
+        for(int i = 0; i < alienArray.size(); i++) {
+            Block alien = alienArray.get(i);
+            if(alien.alive) {
+                g.drawImage(alien.img, alien.x, alien.y, alien.width, alien.height, null);
+            }
+        }
+    }
+
+    public void createAliens() {
+        Random random = new Random();
+        for (int r = 0; r < alienRows; r++) {
+            for (int c = 0; c < alienColumns; c++) {
+                int randomImageIndex = random.nextInt(alienImage.size());
+                Block alien = new Block(
+                        alienX + c*alienWidth,
+                        alienY + r*alienHeight,
+                        alienWidth,
+                        alienHeight,
+                        alienImage.get(randomImageIndex));
+                 alienArray.add(alien);
+            }
+        }
+        alienCount = alienArray.size();
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        repaint();
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) { }
+
+    @Override
+    public void keyPressed(KeyEvent e) { }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_LEFT && ship.x - shipVelocityX >= 0) {
+            ship.x -= shipVelocityX;
+        } else if (e.getKeyCode() == KeyEvent.VK_RIGHT && ship.x + ship.width + shipVelocityX <= boardWidth) {
+            ship.x += shipVelocityX;
+        }
     }
 }

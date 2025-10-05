@@ -17,6 +17,7 @@ public class Game {
         AlienInvasion alienInvasion = new AlienInvasion();
         frame.add(alienInvasion);
         frame.pack();
+        alienInvasion.requestFocus();  
         frame.setVisible(true);
     }
 }

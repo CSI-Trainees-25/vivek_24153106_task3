@@ -175,6 +175,7 @@ public class AlienInvasion extends JPanel implements ActionListener, KeyListener
              alienArray.clear();
              bulletsArray.clear();
              alienVelocityX = 1;
+             //alienVelocityX *= 1.1;
              createAliens();
          }
      }
@@ -216,7 +217,16 @@ public class AlienInvasion extends JPanel implements ActionListener, KeyListener
     public void keyTyped(KeyEvent e) { }
 
     @Override
-    public void keyPressed(KeyEvent e) { }
+    public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_LEFT && ship.x - shipVelocityX >= 0) {
+            ship.x -= shipVelocityX;
+        } else if (e.getKeyCode() == KeyEvent.VK_RIGHT && ship.x + ship.width + shipVelocityX <= boardWidth) {
+            ship.x += shipVelocityX;
+        }else if(e.getKeyCode() == KeyEvent.VK_SPACE) {
+            Block bullet = new Block(ship.x + shipWidth*15/32, ship.y, bulletWidth, bulletHeight, null);
+            bulletsArray.add(bullet);
+        }
+    }
 
     @Override
     public void keyReleased(KeyEvent e) {
